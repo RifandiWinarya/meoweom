@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Login</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  <!-- Bulma CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" />
+  <!-- Font Awesome CSS -->
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+
+
+  <!-- JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto+Slab&family=Roboto:wght@300&family=Ubuntu:wght@700&display=swap"
+    rel="stylesheet" />
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    * {
+      font-family: "Montserrat", sans-serif;
+    }
+
+    body {
+      background-color: #edede9;
+      /* Set the entire body background to white */
+      min-height: 100vh;
+    }
+
+    .section {
+      padding: 1rem 1.5rem;
+      max-width: 750px;
+      margin: auto;
+    }
+
+    .title {
+      font-weight: 800;
+      font-size: 5rem;
+      color: black;
+      /* Black title color */
+    }
+
+    .subtitle {
+      font-size: 2rem;
+      color: black;
+      /* Black subtitle color */
+    }
+
+    .is-sparta {
+      color: black !important;
+      /* Black color for is-sparta class */
+    }
+
+    .button {
+      background-color: black !important;
+      /* Black background for buttons */
+      color: white !important;
+      /* White text color for buttons */
+    }
+
+    .button.is-outlined {
+      border-color: black !important;
+      /* Black border color for outlined buttons */
+      color: black !important;
+      /* Black text color for outlined buttons */
+    }
+
+    .button.is-sparta.is-outlined {
+      background-color: black;
+      /* Set button background color to black */
+      border-color: #e8344e;
+      /* Set button border color to the original color */
+      color: white !important;
+      /* Set button text color to white */
+    }
+
+    .help {
+      color: gray;
+    }
+
+    /* Light gray background for form */
+    .box {
+      background-color: #d3d3d3;
+    }
+
+    .x {
+      background-color: rgb(255, 155, 155) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar is-fixed-top is-white" style="background-color: #edede9;" role="navigation" aria-label="main navigation"></nav>
+  <section class="hero is-white" style="background-color: #edede9;">
+    <div class="hero-body has-text-centered" style="padding-bottom: 1rem; margin: auto;">
+      <h1 class="title is-sparta" >meoWoem</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="box" style="max-width: 480px; margin: auto">
+        <article class="media">
+          <div class="media-content">
+            <div class="content">
+              <div class="field has-addons">
+                <div class="control has-icons-left" style="width: 100%">
+                  <input id="input-username" class="input" type="text" placeholder="id" />
+                  <span class="icon is-small is-left"><i class="fa fa-user"></i></span>
+                </div>
+                <div id="btn-check-dup" class="control is-hidden">
+                  <button class="button is-sparta" onclick="check_dup()">
+                    Check your id
+                  </button>
+                </div>
+              </div>
+              <p id="help-id" class="help is-hidden">
+                For your id, please enter 2-10 English characters, numbers, or
+                the following special characters (._-)
+              </p>
+              <p id="help-id-login" class="help is-danger"></p>
+
+              <div class="field">
+                <div class="control has-icons-left">
+                  <input id="input-password" class="input" type="password" placeholder="password" />
+                  <span class="icon is-small is-left"><i class="fa fa-lock"></i></span>
+                </div>
+                <p id="help-password" class="help is-hidden">
+                  For your password, please enter 8-20 English characters,
+                  numbers, or the following special characters (!@#$%^&*)
+                </p>
+                <p id="help-password-login" class="help is-danger"></p>
+              </div>
+            </div>
+            <div id="div-sign-in-or-up" class="has-text-centered">
+              <nav class="level is-mobile">
+                <button class="level-item button is-sparta" onclick="sign_in()">
+                  Sign In
+                </button>
+                <button class="level-item button" onclick="clearInputs()">
+                  Clear
+                </button>
+              </nav>
+              <hr />
+              <h4 class="mb-3">If you have not yet signed up</h4>
+              <nav class="level is-mobile">
+                <button class="level-item button is-sparta x" onclick="toggle_sign_up()">
+                  Sign Up
+                </button>
+              </nav>
+
+
+            </div>
+        </article>
+      </div>
+    </div>
+  </section>
+  <script>
+    function toggle_sign_up() {
+      window.location.href = "/registrasi"
+    }
+    function sign_in() {
+      let username = $("#input-username").val();
+      let password = $("#input-password").val();
+
+      if (username === "") {
+        $("#help-id-login").text("Please input your id.");
+        $("#input-username").focus();
+        return;
+      } else {
+        $("#help-id-login").text("");
+      }
+
+      if (password === "") {
+        $("#help-password-login").text("Please input your password.");
+        $("#input-password").focus();
+        return;
+      } else {
+        $("#help-password-login").text("");
+      }
+
+      console.log(username, password);
+      $.ajax({
+        type: "POST",
+        url: "/sign_in",
+        data: {
+          username_give: username,
+          password_give: password,
+        },
+        success: function (response) {
+          if (response["result"] === "success") {
+            $.cookie("mytoken", response["token"], { path: "/" });
+            window.location.replace("/");
+          } else {
+            Swal.fire({
+              text: 'Login Gagal',
+            })
+          }
+        },
+      });
+    }
+    function clearInputs() {
+      $("#input-username").val("");
+      $("#input-password").val("");
+      $("#input-password2").val("");
+    }
+  </script>
+</body>
+
+</html>

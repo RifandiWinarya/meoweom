@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artikel</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        font-family: "Montserrat", sans-serif;
+      }
+
+      body {
+        background-color: white;
+      }
+
+      a.nav-link {
+        transition: all 0.5s ease;
+
+        &:hover {
+          background-color: gray;
+        }
+      }
+
+      .logo {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+
+      .icon {
+        width: 30px;
+        height: 30px;
+      }
+
+      .side_artikel {
+        padding: 10px;
+        border: 1px solid grey;
+        border-radius: 10px;
+        background-color: #f3f3f3;
+      }
+
+      .box-main-artikel {
+        background-color: rgb(230, 229, 229);
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px 0px 10px 0px;
+        box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .gambar_artikel {
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        object-fit: cover;
+      }
+
+      .wadah_gambar_artikel {
+        width: 630px;
+        height: 315px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        get_posts("{{ judul }}");
+        get_posts_side();
+      });
+      function get_posts(judul) {
+        $("#postingan").empty();
+        $.ajax({
+          type: "GET",
+          url: `/get_posts_isi?judul_give=${judul}`,
+          data: {},
+          success: function (response) {
+            if (response["result"] === "success") {
+              let data = response.post;
+              let judul = data["judul"].replace(/-/g, " ");
+              let gambar = data["gambar"];
+              let isi = data["isi"];
+
+              let temp_html = `
+                        <div class="wadah_gambar_artikel">
+                            <img class="gambar_artikel"
+                                src="/static/artikel/${gambar}">
+                        </div>
+                        <h2>
+                            ${judul}
+                        </h2>
+                        <p style="white-space: pre-line; text-align: justify;">
+                            ${isi}
+                        </p>
+                        `;
+              $("#postingan").append(temp_html);
+            }
+          },
+        });
+      }
+      function get_posts_side() {
+        $("#side-artikel").empty();
+        $.ajax({
+          type: "GET",
+          url: `/get_posts_side`,
+          data: {},
+          success: function (response) {
+            if (response["result"] === "success") {
+              let posts = response["posts"];
+              for (let i = 0; i < posts.length; i++) {
+                let post = posts[i];
+                let gambar = post["gambar"];
+                temp_html = `
+                            <li>
+                                <a class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none border-top border-bottom"
+                                    href="/artikel/${post["judul"]}">
+                                    <svg class="bd-placeholder-img rounded" width="50" height="50"
+                                        xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+                                        preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <image href="/static/artikel/${gambar}"  width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+                                    </svg>
+                                    <div class="col-lg-8">
+                                        <small class="mb-0">${post[
+                                          "judul"
+                                        ].replace(/-/g, " ")}</small>
+                                    </div>
+                                </a>
+                            </li>
+
+
+                            `;
+                $("#side-artikel").append(temp_html);
+              }
+            }
+          },
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <main class="d-flex flex-nowrap justify-content-center">
+      <div
+        class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark"
+        style="width: 280px; height: 100vh"
+      >
+        <a
+          href="/"
+          class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+        >
+          <svg class="bi pe-none me-2" width="40" height="32">
+            <img
+              class="logo"
+              src="{{ url_for('static', filename='logo.jpeg') }}"
+            />
+          </svg>
+          <span class="fs-4">meoWeom</span>
+        </a>
+        <hr />
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item">
+            <a href="/" class="nav-link text-white" aria-current="page">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon1.png') }}"
+                />
+              </svg>
+              Explore
+            </a>
+          </li>
+          <li>
+            <a href="/artikel" class="nav-link active">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon2.png') }}"
+                />
+              </svg>
+              Artikel
+            </a>
+          </li>
+          <li>
+            <a href="/catshop" class="nav-link text-white">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon3.png') }}"
+                />
+              </svg>
+              Store
+            </a>
+          </li>
+          <li>
+            <a href="/profil/{{username_login}}" class="nav-link text-white">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon4.png') }}"
+                />
+              </svg>
+              Account
+            </a>
+          </li>
+        </ul>
+        <hr />
+        <div class="dropdown">
+          <a href="{{ url_for('logout') }}" class="nav-link text-white">
+            <svg class="bi pe-none me-2" width="16" height="16">
+              <img
+                class="icon"
+                src="{{ url_for('static', filename='icon5.png') }}"
+              />
+            </svg>
+            Sign Out
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="d-flex flex-column flex-shrink-0 p-3"
+        style="width: 680px; height: 100vh; overflow: auto"
+      >
+        <div id="postingan">
+          <div class="wadah_gambar_artikel">
+            <img
+              class="gambar_artikel"
+              src="https://images.unsplash.com/photo-1589642822407-8010881001df?q=80&w=1854&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            />
+          </div>
+          <h2>JUDUL</h2>
+          <p style="white-space: pre-line; text-align: justify">isi</p>
+        </div>
+      </div>
+
+      <div
+        class="d-flex flex-column p-3 border"
+        style="width: 320px; height: 100vh"
+      >
+        <div class="side_artikel">
+          <h5>Artikel Lain</h5>
+          <ul class="list-unstyled" id="side-artikel">
+            <li>
+              <a
+                class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none border-top border-bottom"
+                href="/artikel/isi"
+              >
+                <svg
+                  class="bd-placeholder-img rounded"
+                  width="50"
+                  height="50"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  preserveAspectRatio="xMidYMid slice"
+                  focusable="false"
+                >
+                  <rect width="100%" height="100%" fill="#777"></rect>
+                </svg>
+                <div class="col-lg-8">
+                  <small class="mb-0">Example blog post title</small>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

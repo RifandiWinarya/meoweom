@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artikel</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&family=Oswald:wght@600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      * {
+        font-family: "Montserrat", sans-serif;
+      }
+
+      body {
+        background-color: white;
+      }
+
+      a.nav-link {
+        transition: all 0.5s ease;
+
+        &:hover {
+          background-color: gray;
+        }
+      }
+
+      .logo {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        margin-right: 10px;
+      }
+
+      .icon {
+        width: 30px;
+        height: 30px;
+      }
+
+      .side_artikel {
+        padding: 10px;
+        border: 1px solid grey;
+        border-radius: 10px;
+        background-color: #f3f3f3;
+      }
+
+      .box-main-artikel {
+        background-color: rgb(230, 229, 229);
+        border-radius: 10px;
+        padding: 10px;
+        margin: 10px 0px 10px 0px;
+        box-shadow: 0 3px 4px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+    <script>
+      $(document).ready(function () {
+        get_post();
+      });
+      function time2str(date) {
+        let today = new Date();
+        let time = (today - date) / 1000 / 60; // minutes
+
+        if (time < 60) {
+          return parseInt(time) + " minutes ago";
+        }
+        time = time / 60; // hours
+        if (time < 24) {
+          return parseInt(time) + " hours ago";
+        }
+        time = time / 24; // days
+        if (time < 7) {
+          return parseInt(time) + " days ago";
+        }
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        return `${year}-${month}-${day}`;
+      }
+      function get_post() {
+        $("#postingan").empty();
+        $.ajax({
+          type: "GET",
+          url: `/get_posts`,
+          data: {},
+          success: function (response) {
+            if (response["result"] === "success") {
+              let posts = response["posts"];
+              for (let i = 0; i < posts.length; i++) {
+                let post = posts[i];
+                let gambar = post["gambar"];
+                let tanggal = new Date(post["tanggal"]);
+                let tanggalBersih = time2str(tanggal);
+                temp_html = `
+                            <li class="box-main-artikel">
+                                <a class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none"
+                                    href="/artikel/${post["judul"]}">
+                                    <svg class="bd-placeholder-img" width="100%" height="150" xmlns="http://www.w3.org/2000/svg"
+                                        aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
+                                        <image href="/static/artikel/${gambar}"  width="100%" height="100%" preserveAspectRatio="xMidYMid slice"/>
+                                    </svg>
+                                    <div class="col-lg-8">
+                                        <h6 class="mb-0">${post[
+                                          "judul"
+                                        ].replace(/-/g, " ")}</h6>
+                                        <small class="text-body-secondary">${tanggalBersih}</small>
+                                    </div>
+                                    
+                                </a>
+                                {%if role == 'admin'%}
+                                    <button type="button" class="btn" style="background-color: #dda15e; " onclick="hapus('${
+                                      post["_id"]["$oid"]
+                                    }')">Delete</button>
+                                    {% endif %}
+                            </li>
+                            `;
+                $("#postingan").append(temp_html);
+              }
+            }
+          },
+        });
+      }
+
+      function hapus(id_give) {
+        if (confirm("Are you sure you want to delete it?")) {
+          // console.log(id_give)
+          $.ajax({
+            type: "POST",
+            url: "/hapus_postingan_artikel",
+            data: {
+              id_give: id_give,
+            },
+            success: function (response) {
+              window.location.reload();
+            },
+          });
+        }
+      }
+
+      function post() {
+        let judulArtikel = $("#Judul-Artikel").val();
+        if (judulArtikel === "") {
+          Swal.fire({
+            text: "Please fill in the field.",
+          });
+          return;
+        }
+        let isiArtikel = $("#Isi-Artikel").val();
+        if (isiArtikel === "") {
+          Swal.fire({
+            text: "Please fill in the field.",
+          });
+          return;
+        }
+        let gambarArtikel = $("#File-Gambar-Artikel")[0].files[0];
+        if (gambarArtikel === "" || gambarArtikel === undefined) {
+          Swal.fire({
+            text: "Please fill in the field.",
+          });
+          return;
+        }
+        let tanggal = new Date().toISOString();
+
+        let form_data = new FormData();
+        form_data.append("file_give", gambarArtikel);
+        form_data.append("judul_give", judulArtikel);
+        form_data.append("isi_give", isiArtikel);
+        form_data.append("tanggal_give", tanggal);
+        console.log(judulArtikel, isiArtikel, gambarArtikel, tanggal);
+        $.ajax({
+          type: "POST",
+          url: "/postingb",
+          data: form_data,
+          cache: false,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            if (response.result === "success") {
+              window.location.reload();
+            } else {
+              alert(response.msg);
+            }
+          },
+          error: function (error) {
+            console.error("Error posting article:", error);
+            alert("Error posting article. Please try again.");
+          },
+        });
+      }
+    </script>
+  </head>
+
+  <body>
+    <main class="d-flex flex-nowrap">
+      <div
+        class="d-flex flex-column flex-shrink-0 p-3 text-bg-dark"
+        style="width: 280px; height: 100vh"
+      >
+        <a
+          href="/"
+          class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
+        >
+          <svg class="bi pe-none me-2" width="40" height="32">
+            <img
+              class="logo"
+              src="{{ url_for('static', filename='logo.jpeg') }}"
+            />
+          </svg>
+          <span class="fs-4">meoWeom</span>
+        </a>
+        <hr />
+        <ul class="nav nav-pills flex-column mb-auto">
+          <li class="nav-item">
+            <a href="/" class="nav-link text-white" aria-current="page">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon1.png') }}"
+                />
+              </svg>
+              Explore
+            </a>
+          </li>
+          <li>
+            <a href="/artikel" class="nav-link active">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon2.png') }}"
+                />
+              </svg>
+              Artikel
+            </a>
+          </li>
+          <li>
+            <a href="/catshop" class="nav-link text-white">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon3.png') }}"
+                />
+              </svg>
+              Store
+            </a>
+          </li>
+          <li>
+            <a href="/profil/{{username_login}}" class="nav-link text-white">
+              <svg class="bi pe-none me-2" width="16" height="16">
+                <img
+                  class="icon"
+                  src="{{ url_for('static', filename='icon4.png') }}"
+                />
+              </svg>
+              Account
+            </a>
+          </li>
+        </ul>
+        <hr />
+        <div class="dropdown">
+          <a href="{{ url_for('logout') }}" class="nav-link text-white">
+            <svg class="bi pe-none me-2" width="16" height="16">
+              <img
+                class="icon"
+                src="{{ url_for('static', filename='icon5.png') }}"
+              />
+            </svg>
+            Sign Out
+          </a>
+        </div>
+      </div>
+
+      <div
+        class="d-flex flex-column flex-shrink-0 p-3"
+        style="width: 78%; height: 100vh; overflow: auto"
+      >
+        <ul class="list-unstyled" id="postingan">
+          <li class="box-main-artikel">
+            <a
+              class="d-flex flex-column flex-lg-row gap-3 align-items-start align-items-lg-center py-3 link-body-emphasis text-decoration-none"
+              href="/artikel/isi"
+            >
+              <svg
+                class="bd-placeholder-img"
+                width="100%"
+                height="96"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                preserveAspectRatio="xMidYMid slice"
+                focusable="false"
+              >
+                <image
+                  href=""
+                  width="100%"
+                  height="100%"
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </svg>
+              <div class="col-lg-8">
+                <h6 class="mb-0">Example blog post title</h6>
+                <small class="text-body-secondary">13 Jam</small>
+              </div>
+            </a>
+          </li>
+        </ul>
+        {%if role == 'admin'%}
+
+        <button
+          type="button"
+          class="btn btn-primary btn-lg gap-2"
+          style="
+            position: fixed;
+            bottom: 5%;
+            right: 3%;
+            display: flex;
+            align-items: center;
+          "
+          data-bs-toggle="modal"
+          data-bs-target="#modal-post"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            fill="currentColor"
+            class="bi bi-plus-square"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"
+            />
+            <path
+              d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"
+            /></svg
+          >Posting
+        </button>
+
+        <div
+          class="modal fade"
+          id="modal-post"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create Post</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="formFile" class="form-label"
+                    >Choose Image Artikel</label
+                  >
+                  <input
+                    class="form-control"
+                    type="file"
+                    id="File-Gambar-Artikel"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="exampleFormControlInput1" class="form-label"
+                    >Article Title</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="Judul-Artikel"
+                    placeholder="Article Title..."
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="formFile" class="form-label"
+                    >Write The Article Content</label
+                  >
+                  <textarea
+                    id="Isi-Artikel"
+                    class="form-control"
+                    placeholder="Write about Cats..."
+                  ></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="post()">
+                  Create post
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  data-bs-dismiss="modal"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% endif %}
+      </div>
+    </main>
+  </body>
+</html>
